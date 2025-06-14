@@ -2,28 +2,39 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TeamMemberResource\Pages;
-use App\Filament\Resources\TeamMemberResource\RelationManagers;
-use App\Models\TeamMember;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
+use App\Models\TeamMember;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\TeamMemberResource\Pages;
+use App\Filament\Resources\TeamMemberResource\RelationManagers;
 
 class TeamMemberResource extends Resource
 {
     protected static ?string $model = TeamMember::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Select::make('user_id')
+                    ->label('User')
+                    ->relationship('user', 'email')
+                    ->searchable()
+                    ->required(),
+
+                TextInput::make('position')
+                    ->label('Position')
+                    ->required(),
             ]);
     }
 
@@ -31,7 +42,9 @@ class TeamMemberResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('user.name')->label('Name')->searchable(),
+                TextColumn::make('user.email')->label('Email')->searchable(),
+                TextColumn::make('position')->label('Position'),
             ])
             ->filters([
                 //
@@ -43,7 +56,8 @@ class TeamMemberResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('id', 'desc');
     }
 
     public static function getRelations(): array

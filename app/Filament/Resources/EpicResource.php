@@ -2,28 +2,36 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\EpicResource\Pages;
-use App\Filament\Resources\EpicResource\RelationManagers;
-use App\Models\Epic;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Models\Epic;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\EpicResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\EpicResource\RelationManagers;
 
 class EpicResource extends Resource
 {
     protected static ?string $model = Epic::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-flag';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                TextInput::make('name')->required(),
+                Select::make('project_id')
+                    ->relationship('project', 'name')
+                    ->required(),
+                Textarea::make('description'),
             ]);
     }
 
@@ -31,7 +39,8 @@ class EpicResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('project.name')->label('Project')->searchable(),
             ])
             ->filters([
                 //
@@ -43,7 +52,8 @@ class EpicResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('id', 'desc');
     }
 
     public static function getRelations(): array

@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('project_team_member', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('team_lead_id')->nullable()->constrained('team_members')->nullOnDelete();
-            $table->string('name');
-            $table->string('prefix')->unique();
-            $table->text('description')->nullable();
-            $table->date('deadline')->nullable();
+            $table->foreignId('project_id')->constrained()->onDelete('cascade');
+            $table->foreignId('team_member_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('project_team_member');
     }
 };

@@ -20,4 +20,9 @@ class Project extends Model
     {
         return $this->hasMany(Epic::class);
     }
+
+    public function teamMembers()
+    {
+        return $this->belongsToMany(TeamMember::class)->withTimestamps();
+    }
 }

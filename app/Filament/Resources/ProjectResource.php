@@ -2,16 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProjectResource\Pages;
-use App\Filament\Resources\ProjectResource\RelationManagers;
-use App\Models\Project;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Project;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\ProjectResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\ProjectResource\RelationManagers;
 
 class ProjectResource extends Resource
 {
@@ -23,7 +24,20 @@ class ProjectResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('teamMembers')
+                    ->label('Team Members')
+                    ->multiple()
+                    ->relationship('teamMembers', 'id')
+                    ->getOptionLabelUsing(function ($value) {
+                        $teamMember = \App\Models\TeamMember::find($value);
+                        return $teamMember && $teamMember->user
+                            ? "{$teamMember->user->name} ({$teamMember->user->email})"
+                            : 'N/A';
+                    })
+
+                    ->preload()
+                    ->searchable(),
+
             ]);
     }
 

@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects', function (Blueprint $table) {
+        Schema::create('team_members', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('team_lead_id')->nullable()->constrained('team_members')->nullOnDelete();
-            $table->string('name');
-            $table->string('prefix')->unique();
-            $table->text('description')->nullable();
-            $table->date('deadline')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // relasi ke users
+            $table->string('position')->nullable(); // jabatan/tugas
             $table->timestamps();
         });
     }
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('projects');
+        Schema::dropIfExists('team_members');
     }
 };
