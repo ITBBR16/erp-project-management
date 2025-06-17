@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('team_members', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // relasi ke users
-            $table->string('position')->nullable(); // jabatan/tugas
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('position')->nullable();
             $table->timestamps();
         });
     }

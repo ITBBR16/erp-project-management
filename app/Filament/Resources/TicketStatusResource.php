@@ -18,6 +18,8 @@ class TicketStatusResource extends Resource
     protected static ?string $model = TicketStatus::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {

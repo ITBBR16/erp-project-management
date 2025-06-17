@@ -20,20 +20,28 @@ class TeamMemberResource extends Resource
 {
     protected static ?string $model = TeamMember::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?string $navigationGroup = 'Team Management';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Select::make('user_id')
+                    ->relationship('user', 'name')
                     ->label('User')
-                    ->relationship('user', 'email')
                     ->searchable()
                     ->required(),
 
-                TextInput::make('position')
-                    ->label('Position')
+                Select::make('role')
+                    ->options([
+                        'Project Manager' => 'Project Manager',
+                        'Developer' => 'Developer',
+                        'Designer' => 'Designer',
+                        'Manager' => 'Manager',
+                        'QA Tester' => 'QA Tester',
+                    ])
                     ->required(),
             ]);
     }

@@ -18,6 +18,8 @@ class CommentResource extends Resource
     protected static ?string $model = Comment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static ?string $navigationGroup = 'Workspace';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

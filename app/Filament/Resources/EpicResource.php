@@ -22,6 +22,8 @@ class EpicResource extends Resource
     protected static ?string $model = Epic::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-flag';
+    protected static ?string $navigationGroup = 'Project Management';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
