@@ -18,6 +18,6 @@ class TeamMember extends Model
 
     public function projects()
     {
-        return $this->belongsToMany(Project::class)->withTimestamps();
+        return $this->belongsToMany(Project::class, 'project_team_member', 'team_member_id', 'project_id');
     }
 }

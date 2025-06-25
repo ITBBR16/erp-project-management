@@ -10,6 +10,7 @@ class Project extends Model
     use HasFactory;
 
     protected $fillable = ['name', 'prefix', 'description', 'deadline'];
+    protected $withCount = ['teamMembers'];
 
     public function tickets()
     {
@@ -21,8 +22,13 @@ class Project extends Model
         return $this->hasMany(Epic::class);
     }
 
+    public function teamLead()
+    {
+        return $this->belongsTo(TeamMember::class, 'team_lead_id');
+    }
+
     public function teamMembers()
     {
-        return $this->belongsToMany(TeamMember::class)->withTimestamps();
+        return $this->belongsToMany(TeamMember::class, 'project_team_member', 'project_id', 'team_member_id');
     }
 }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('color')->default('gray');
+            $table->integer('order')->default(0);
             $table->timestamps();
         });
     }

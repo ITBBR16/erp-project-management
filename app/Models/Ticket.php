@@ -20,6 +20,10 @@ class Ticket extends Model
         'due_date',
     ];
 
+    protected $casts = [
+        'due_date' => 'date',
+    ];
+
     protected static function booted()
     {
         static::creating(function ($ticket) {

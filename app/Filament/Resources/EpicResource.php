@@ -29,11 +29,23 @@ class EpicResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
                 Select::make('project_id')
+                    ->label('Project')
                     ->relationship('project', 'name')
+                    ->searchable()
+                    ->preload()
                     ->required(),
-                Textarea::make('description'),
+
+                TextInput::make('name')
+                    ->label('Epic Name')
+                    ->required()
+                    ->maxLength(255),
+
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(1000)
+                    ->rows(4)
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -41,8 +53,19 @@ class EpicResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('project.name')->label('Project')->searchable(),
+                TextColumn::make('project.name')
+                    ->label('Project')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('name')
+                    ->label('Epic Name')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('created_at')
+                    ->date()
+                    ->label('Created'),
             ])
             ->filters([
                 //

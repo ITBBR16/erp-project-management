@@ -9,6 +9,13 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TicketResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -26,12 +33,43 @@ class TicketResource extends Resource
     {
         return $form
             ->schema([
+                Select::make('project_id')
+                    ->relationship('project', 'name')
+                    ->label('Project')
+                    ->required()
+                    ->searchable(),
+
                 Select::make('epic_id')
-                    ->label('Epic')
                     ->relationship('epic', 'name')
+                    ->label('Epic')
                     ->searchable()
-                    ->preload()
                     ->nullable(),
+
+                Select::make('ticket_status_id')
+                    ->relationship('status', 'name')
+                    ->label('Status')
+                    ->required(),
+
+                Select::make('assignee_id')
+                    ->relationship('assignee', 'name')
+                    ->label('Assignee')
+                    ->searchable()
+                    ->nullable(),
+
+                TextInput::make('title')
+                    ->label('Title')
+                    ->required()
+                    ->maxLength(255),
+
+                DatePicker::make('due_date')
+                    ->label('Due Date')
+                    ->nullable(),
+
+                Textarea::make('description')
+                    ->label('Description')
+                    ->rows(4)
+                    ->nullable()
+                    ->columnSpan(2),
             ]);
     }
 
@@ -39,13 +77,37 @@ class TicketResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('identifier')
+                    ->label('ID')
+                    ->searchable(),
+                TextColumn::make('title')
+                    ->limit(30)
+                    ->searchable(),
+                TextColumn::make('project.name')
+                    ->label('Project'),
+                TextColumn::make('status.name')
+                    ->label('Status')
+                    ->badge(),
+                TextColumn::make('assignee.name')
+                    ->label('Assignee')
+                    ->default('-'),
+                TextColumn::make('due_date')
+                    ->label('Due')
+                    ->date(),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                ])
+                    ->button()
+                    ->label('Actions'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -67,8 +129,6 @@ class TicketResource extends Resource
             'index' => Pages\ListTickets::route('/'),
             'create' => Pages\CreateTicket::route('/create'),
             'edit' => Pages\EditTicket::route('/{record}/edit'),
-            'view' => Pages\ViewTicket::route('/{record}'),
-            'kanban' => Pages\KanbanBoard::route('/kanban'),
         ];
     }
 }

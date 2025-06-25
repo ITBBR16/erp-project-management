@@ -34,7 +34,7 @@ class TeamMemberResource extends Resource
                     ->searchable()
                     ->required(),
 
-                Select::make('role')
+                Select::make('position')
                     ->options([
                         'Project Manager' => 'Project Manager',
                         'Developer' => 'Developer',

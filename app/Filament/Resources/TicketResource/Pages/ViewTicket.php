@@ -2,19 +2,27 @@
 
 namespace App\Filament\Resources\TicketResource\Pages;
 
+use Filament\Actions;
+use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Resources\TicketResource;
-use Filament\Resources\Pages\Page;
 
-class ViewTicket extends Page
+class ViewTicket extends ViewRecord
 {
-    protected static string $resource = TicketResource::class;
+    public string $commentContent = '';
 
-    protected static string $view = 'filament.resources.ticket-resource.pages.view-ticket';
-
-    public $record;
-
-    public function mount($record): void
+    public function addComment()
     {
-        $this->record = TicketResource::getModel()::findOrFail($record);
+        $this->validate([
+            'commentContent' => 'required|string|max:1000',
+        ]);
+
+        $this->record->comments()->create([
+            'user_id' => auth()->id,
+            'content' => $this->commentContent,
+        ]);
+
+        $this->commentContent = '';
+
+        $this->notify('success', 'Comment added successfully.');
     }
 }
