@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Ticket;
@@ -16,6 +17,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\TicketResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -83,24 +85,67 @@ class TicketResource extends Resource
                 TextColumn::make('title')
                     ->limit(30)
                     ->searchable(),
-                TextColumn::make('project.name')
-                    ->label('Project'),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->badge(),
                 TextColumn::make('assignee.name')
                     ->label('Assignee')
                     ->default('-'),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->getStateUsing(fn($record) => Carbon::parse($record->created_at)->format('d M Y')),
                 TextColumn::make('due_date')
                     ->label('Due')
                     ->date(),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime(),
             ])
             ->filters([
-                //
+                SelectFilter::make('epic_id')
+                    ->label('Filter Epic')
+                    ->options(function () {
+                        $projectId = request()->query('project_id');
+                        if (!$projectId) return [];
+
+                        return \App\Models\Epic::where('project_id', $projectId)
+                            ->pluck('name', 'id');
+                    })
+                    ->searchable(),
+
+                SelectFilter::make('ticket_status_id')
+                    ->label('Filter Status')
+                    ->options(function () {
+                        $projectId = request()->query('project_id');
+                        if (!$projectId) return [];
+
+                        return \App\Models\TicketStatus::whereHas('tickets', function ($q) use ($projectId) {
+                            $q->where('project_id', $projectId);
+                        })->pluck('name', 'id');
+                    })
+                    ->searchable(),
             ])
+            ->modifyQueryUsing(function ($query) {
+                $projectId = request()->query('project_id');
+
+                if (!$projectId) {
+                    return $query->whereRaw('1 = 0'); // Tidak tampilkan apapun jika belum pilih project
+                }
+
+                return $query
+                    ->where('project_id', $projectId)
+                    ->leftJoin('ticket_statuses', 'tickets.ticket_status_id', '=', 'ticket_statuses.id')
+                    ->orderByRaw("
+                        CASE
+                            WHEN ticket_statuses.name = 'Done' THEN 1
+                            ELSE 0
+                        END
+                    ")
+                    ->orderBy('tickets.created_at', 'desc')
+                    ->select('tickets.*');
+            })
+            ->emptyStateHeading('Tidak ada tiket')
+            ->emptyStateDescription(fn() => request()->input('tableFilters.project_id.value')
+                ? 'Tidak ditemukan tiket untuk project yang dipilih.'
+                : 'Silakan pilih project terlebih dahulu.')
+            ->emptyStateIcon('heroicon-o-document')
             ->actions([
                 ActionGroup::make([
                     ViewAction::make(),
