@@ -34,4 +34,15 @@ class ListTickets extends ListRecords
                 ->modalSubmitActionLabel('Lihat Tiket'),
         ];
     }
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        if ($projectId = request()->query('project_id')) {
+            $this->tableFilters = [
+                'project_id' => ['value' => $projectId],
+            ];
+        }
+    }
 }

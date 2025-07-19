@@ -99,10 +99,15 @@ class TicketResource extends Resource
                     ->date(),
             ])
             ->filters([
+                SelectFilter::make('project_id')
+                    ->label('Project')
+                    ->options(\App\Models\Project::pluck('name', 'id'))
+                    ->hidden(),
+
                 SelectFilter::make('epic_id')
                     ->label('Filter Epic')
                     ->options(function () {
-                        $projectId = request()->query('project_id');
+                        $projectId = request()->input('tableFilters.project_id.value') ?? request()->query('project_id');
                         if (!$projectId) return [];
 
                         return \App\Models\Epic::where('project_id', $projectId)
@@ -113,7 +118,7 @@ class TicketResource extends Resource
                 SelectFilter::make('ticket_status_id')
                     ->label('Filter Status')
                     ->options(function () {
-                        $projectId = request()->query('project_id');
+                        $projectId = request()->input('tableFilters.project_id.value') ?? request()->query('project_id');
                         if (!$projectId) return [];
 
                         return \App\Models\TicketStatus::whereHas('tickets', function ($q) use ($projectId) {
@@ -123,10 +128,10 @@ class TicketResource extends Resource
                     ->searchable(),
             ])
             ->modifyQueryUsing(function ($query) {
-                $projectId = request()->query('project_id');
+                $projectId = request()->input('tableFilters.project_id.value') ?? request()->query('project_id');
 
                 if (!$projectId) {
-                    return $query->whereRaw('1 = 0'); // Tidak tampilkan apapun jika belum pilih project
+                    return $query->whereRaw('1 = 0');
                 }
 
                 return $query

@@ -36,14 +36,14 @@ class StatsDashboard extends BaseWidget
                 ->descriptionIcon('heroicon-o-ticket', IconPosition::Before)
                 ->color('success'),
             Stat::make(
-                'New tickets this week',
+                'Queue Tickets',
                 Ticket::query()
                     ->when(!$isAdmin, fn($q) => $q->where('user_id', Auth::id()))
-                    ->where('created_at', '>=', now()->subDays(7))
+                    ->whereHas('status', fn($q) => $q->where('name', 'To Do'))
                     ->count()
             )
-                ->description('Created in the last 7 days')
-                ->descriptionIcon('heroicon-o-plus-circle', IconPosition::Before)
+                ->description('Queued tickets waiting for action')
+                ->descriptionIcon('heroicon-o-queue-list', IconPosition::Before)
                 ->color('info'),
             Stat::make(
                 'Unassignee Tickets',
@@ -54,6 +54,16 @@ class StatsDashboard extends BaseWidget
             )
                 ->description('Tickets without an assignee')
                 ->descriptionIcon('heroicon-o-user-minus', IconPosition::Before)
+                ->color('danger'),
+            Stat::make(
+                'Overdue Tickets',
+                Ticket::query()
+                    ->when(!$isAdmin, fn($q) => $q->where('user_id', Auth::id()))
+                    ->where('due_date', '<', now())
+                    ->count()
+            )
+                ->description('Tickets past their due date')
+                ->descriptionIcon('heroicon-o-exclamation-triangle', IconPosition::Before)
                 ->color('danger'),
             $isAdmin
                 ? Stat::make('Team Members', User::count())
